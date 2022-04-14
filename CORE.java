@@ -10,6 +10,20 @@ public class CORE
         CORE.theClientDOSsss.add(dos);
     }
     
+    public static synchronized void removeReceivers()
+    {
+        for(DataOutputStream dos : CORE.theClientDOSsss)
+        {
+            try {
+                dos.close();
+            } catch (Exception e) {
+                //TODO: handle exception
+            }
+            
+        }
+        CORE.theClientDOSsss.clear();
+    }
+
     public synchronized static void broadCastByte(byte b)
     {
         try

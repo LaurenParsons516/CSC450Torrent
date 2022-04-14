@@ -47,6 +47,16 @@ public class TorrentThread extends Thread
             catch(EOFException e)
             {
                 System.out.println("Done Receiving File");
+                try 
+                {
+                    CORE.removeReceivers();
+                    this.clientSocket.close();
+                } 
+                catch (IOException ioe ) 
+                {
+                    //TODO: handle exception
+                }
+                
             }
             catch(IOException e)
             {
