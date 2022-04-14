@@ -14,58 +14,10 @@ public class ClientDriver
     public static void main(String[] args) throws Exception
     {
         Socket s = new Socket("localhost", 2222);
-        Scanner textInput = new Scanner(s.getInputStream());
-        Scanner localInput = new Scanner(System.in);
-        PrintStream textOutput = new PrintStream(s.getOutputStream());
-        String question = textInput.nextLine();
-        System.out.print(question);
-        String answer = localInput.nextLine();
-        textOutput.println(answer);
-        if(answer.equals("send"))
-        {
-            try
-            {
-                String filename = "cambria.jpeg";
-                FileInputStream fis = new FileInputStream(filename);
-                DataInputStream dis = new DataInputStream(fis);
-                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
-                while(true)
-                {
-                    byte b = dis.readByte();
-                    dos.writeByte(b);
-                }
-            }
-            catch(EOFException e)
-            {
-                System.out.println("Finished Sending File");
-            }
-        }
-        else if(answer.equals("receive"))
-        {
-            //we want to receive the bytes and write to a local file
-            FileOutputStream fos = new FileOutputStream("cambriaCopy.jpeg");
-            DataOutputStream dos = new DataOutputStream(fos);
-            try
-            {
-                DataInputStream dis_Client = new DataInputStream(s.getInputStream());
-                while(true)
-                {
-                    byte b = dis_Client.readByte();
-                    dos.writeByte(b);
-                }
-            }
-            catch (EOFException e)
-            {
-                System.out.println("File Received");
-                fos.close();
-                System.exit(0);
-            }
-            catch(IOException e)
-            {
-                e.printStackTrace();
-                
-            }
-            
-        }
+        String torrentName = "cambria.jpeg";
+        PrintStream textOutputOverSocket = new PrintStream(s.getOutputStream());
+        textOutputOverSocket.println(torrentName);
+        textOutputOverSocket.println("ip address") //HOW DO WE GET OUT IP!!!!!!
+        textOutputOverSocket.println("" + ClientCORE.getNextPortNumber());
     }
 }
