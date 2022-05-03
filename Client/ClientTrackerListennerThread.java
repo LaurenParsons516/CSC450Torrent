@@ -15,6 +15,7 @@ public class ClientTrackerListennerThread extends Thread
         while(true)
         {
             String listOfIPS = this.trackerInput.nextLine();
+            System.out.println(listOfIPS);
             ClientCORE.updateTheConnectedClientIPs(listOfIPS);
         }
     }
