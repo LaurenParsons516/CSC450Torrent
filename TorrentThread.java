@@ -28,9 +28,58 @@ public class TorrentThread extends Thread
 
     public void run()
     {
-        //get the torrent they want to participate in
-        String torrentName = this.textInput.nextLine();
-        String ip_address = this.textInput.nextLine();
-        String port_number = this.textInput.nextLine();
+        System.out.println("Child thread started!!!!");
+        this.textOutput.println("Do you want to send or receive a file or part of a file? ");
+        String answer = this.textInput.nextLine();
+
+        if(answer.equals("send"))
+        {
+            System.out.println("receiving a file from the client");
+            try
+            {
+                DataInputStream dis = new DataInputStream(this.clientSocket.getInputStream());
+                while(true)
+                {
+                    byte b = dis.readByte();
+                    CORE.broadCastByte(b);
+                }
+            }
+            catch(EOFException e)
+            {
+                System.out.println("Done Receiving File");
+                try 
+                {
+                    CORE.removeReceivers();
+                    this.clientSocket.close();
+                } 
+                catch (IOException ioe ) 
+                {
+                    //TODO: handle exception
+                }
+                
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+            }
+        }
+        else if(answer.equals("receive"))
+        {
+            try
+            {
+                System.out.println("sending a file to the client");
+                CORE.addDOS(new DataOutputStream(this.clientSocket.getOutputStream()));
+            }
+            catch(Exception e)
+            {
+                e.printStackTrace();
+            }
+        } else if(answer.equals("part")) {
+            //System.out.println("here");
+            int requestedByte = Integer.parseInt(textInput.nextLine());
+            //System.out.println("here 2");
+            this.textOutput.println("nobyte");
+            //System.out.println("sent back");
+        }
     }
 }

@@ -6,35 +6,94 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.net.Inet4Address;
 import java.net.Socket;
+import java.util.Random;
 import java.util.Scanner;
 
 public class ClientDriver 
 {
-    //the below info would have been gleened from a .torrent file
-    private static String TRACKERIP = "localhost";
-    private static int TRACKERPORT = 6881;
-
     public static void main(String[] args) throws Exception
     {
-        Socket s = new Socket(TRACKERIP, TRACKERPORT);
-        Scanner socketInput = new Scanner(s.getInputStream());
-        PrintStream socketOutput = new PrintStream(s.getOutputStream());
-        socketOutput.println(Inet4Address.getLocalHost().getHostAddress());
-        String myPortNumber = socketInput.nextLine();
-        String listOfConnectedClients = socketInput.nextLine();
-        ClientCORE.updateTheConnectedClientIPs(listOfConnectedClients);
-        
-        //maintain the connection with the tracker to get updates on
-        //connected clients
-        (new ClientTrackerListennerThread(socketInput)).start();
-        
-        //create a server thread to establish connections with the Swarm
-        (new ClientServerThread(Integer.parseInt(myPortNumber))).start();
+        Socket s = new Socket("localhost", 2222);
+        Scanner textInput = new Scanner(s.getInputStream());
+        Scanner localInput = new Scanner(System.in);
+        PrintStream textOutput = new PrintStream(s.getOutputStream());
+        String question = textInput.nextLine();
+        System.out.print(question);
+        String answer = localInput.nextLine();
+        textOutput.println(answer);
+        //System.out.println(answer);
+        if(answer.equals("send"))
+        {
+            try
+            {
+                String filename = "cambria.jpeg";
+                FileInputStream fis = new FileInputStream(filename);
+                DataInputStream dis = new DataInputStream(fis);
+                DataOutputStream dos = new DataOutputStream(s.getOutputStream());
+                while(true)
+                {
+                    byte b = dis.readByte();
+                    dos.writeByte(b);
+                }
+            }
+            catch(EOFException e)
+            {
+                System.out.println("Finished Sending File");
+            }
+        }
+        else if(answer.equals("receive"))
+        {
+            //we want to receive the bytes and write to a local file
+            FileOutputStream fos = new FileOutputStream("cambriaCopy.jpeg");
+            DataOutputStream dos = new DataOutputStream(fos);
+            try
+            {
+                DataInputStream dis_Client = new DataInputStream(s.getInputStream());
+                while(true)
+                {
+                    byte b = dis_Client.readByte();
+                    dos.writeByte(b);
+                }
+            }
+            catch (EOFException e)
+            {
+                System.out.println("File Received");
+                fos.close();
+                System.exit(0);
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
+                
+            }
+            
+        } else if(answer.equals("part")) {
+            FileOutputStream fos = new FileOutputStream("cambriaCopy.jpeg");
+            DataOutputStream dos = new DataOutputStream(fos);
+            try
+            {
+                int randomByte = new Random().nextInt();
+                textOutput.println(randomByte);
+                answer = textInput.nextLine();
+                if (answer.equals("nobyte")) {
+                    System.out.println("No bytes to be received");
+                } else {
+                    dos.writeChars(answer);
+                }
+            }
+            catch (EOFException e)
+            {
+                System.out.println("File Received");
+                fos.close();
+                System.exit(0);
+            }
+            catch(IOException e)
+            {
+                e.printStackTrace();
 
-        //In our main thread here, we want to start the torrent process of sharing bits
-        while(true){}
-        
+            }
+
+        }
     }
 }
